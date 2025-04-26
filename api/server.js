@@ -51,7 +51,7 @@ const upload = multer({
     key: (req, file, cb) => {
       const timestamp = Date.now();
       const safeName = file.originalname.replace(/\s+/g, '_');
-      cb(null, `menu-images/${timestamp}-${safeName}`);
+      cb(null, `menu-images/${process.env.ENVIRONMENT}/${timestamp}-${safeName}`);
     },
   }),
   fileFilter: (req, file, cb) => {

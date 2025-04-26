@@ -10,7 +10,7 @@
             type="email"
             v-model="username"
             required
-            placeholder="admin@example.com"
+            placeholder="admin@example"
           />
         </label>
 
@@ -48,30 +48,24 @@ const showPassword = ref(false);
 const error = ref('');
 const router = useRouter();
 
-// Toggle password visibility
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
 
-// Handle login form submission
 const handleLogin = async () => {
-  error.value = ''; // Clear previous errors
+  error.value = '';
 
   try {
-    // Sending the login request with credentials
     const response = await login({ username: username.value, password: password.value });
 
-    // Assuming the API returns a token on successful login
     if (response.data.token) {
-      // Save the token to localStorage (or your preferred storage method)
       localStorage.setItem('authToken', response.data.token);
-      router.push('/admin'); // Redirect to the admin dashboard
+      router.push('/admin'); 
     } else {
-      error.value = 'Invalid email or password'; // If no token is returned
+      error.value = response.data.error ? response.data.error : 'an error occured please contact support'
     }
   } catch (err) {
-    error.value = 'An error occurred during login. Please try again.'; // Handle API error
-    console.error(err);
+    error.value = err.response.data.error ? err.response.data.error: 'an error occured please contact suport'
   }
 };
 </script>

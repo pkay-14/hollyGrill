@@ -79,7 +79,7 @@ const props = defineProps({
   isEdit: Boolean
 });
 
-const emit = defineEmits(['submitted', 'reset']);
+const emit = defineEmits(['submitEvent', 'reset']);
 
 const form = ref({
   name: '',
@@ -125,6 +125,7 @@ const handleImageUpload = (e) => {
 };
 
 const handleSubmit = async () => {
+  emit('submitEvent');
   const formData = new FormData();
   formData.append('name', form.value.name);
   formData.append('description', form.value.description);
@@ -141,7 +142,6 @@ const handleSubmit = async () => {
     } else {
       await createMenuItem(formData);
     }
-    emit('submitted');
     handleReset();
   } catch (err) {
     console.error('Error saving item:', err);
@@ -157,7 +157,7 @@ const handleDelete = async () => {
   if (props.item?.id && confirm('Are you sure you want to delete this item?')) {
     try {
       await deleteMenuItem(props.item.id);
-      emit('submitted');
+      emit('submitEvent');
       handleReset();
     } catch (err) {
       console.error('Error deleting item:', err);
