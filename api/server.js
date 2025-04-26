@@ -17,6 +17,15 @@ const openDb = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+if (process.env.ENVIRONMENT === 'production') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, 'https://' + req.headers.host + req.url);
+    }
+    next();
+  });
+}
+
 const distPath = path.join(__dirname, '..', 'dist');
 const uploadDir = path.join(__dirname, '..', 'public/images/uploads');
 
