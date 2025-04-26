@@ -10,7 +10,7 @@
           :class="{ selected: selectedItem === item.id }"
           @click="selectItem(item.id)"
         >
-          <img :src="item.image ? `/images/uploads/${item.image}`:'/images/noImage.jpeg'" :alt="item.name" class="menu-image"/>
+          <img :src="item.image ? item.image :'/images/noImage.jpeg'" :alt="item.name" class="menu-image"/>
           <div class="menu-details">
             <h3 class="menu-name">{{ item.name }}</h3>
             <p class="menu-price">ghs{{ item.price.toFixed(2) }}</p>

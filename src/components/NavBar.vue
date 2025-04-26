@@ -2,7 +2,7 @@
   <nav class="navbar">
     <div class="logo">
       <span>
-        <img src="../../public/holyGrillLogo.jpeg" alt="">
+        <img src="../../public/images/holyGrillLogo.jpeg" alt="">
       </span>
       <h4 class="nameTag">Holy Grill</h4> 
     </div>

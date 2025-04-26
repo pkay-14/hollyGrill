@@ -8,7 +8,7 @@
       <div class="sidebar-header">
         <!-- Logo and Name -->
         <div class="logo-container" @click="goToHome">
-          <img class="logo" src="../../public/holyGrillLogo.jpeg" alt="Logo" />
+          <img class="logo" src="../../public/images/holyGrillLogo.jpeg" alt="Logo" />
           <h2 class="sidebar-name">Holy Grill</h2> <!-- Restaurant name -->
         </div>
       </div>

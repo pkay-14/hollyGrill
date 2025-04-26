@@ -25,7 +25,7 @@
             :class="{ selected: selectedItem === item.id }"
             @click="handleSelect(item.id)"
           >
-            <img :src="item.image ? `/images/uploads/${item.image}`: '/images/noImage.jpeg'" class="card-img" />
+          <img :src="item.image || '/images/noImage.jpeg'" class="card-img" />
             <div class="card-body">
               <h4>{{ item.name }}</h4>
               <p class="price">ghs{{ item.price.toFixed(2) }}</p>

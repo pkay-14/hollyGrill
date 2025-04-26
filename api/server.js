@@ -1,11 +1,18 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const multerS3 = require('multer-s3');
 const bcrypt = require('bcryptjs');
-const openDb = require('./db');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'your-secret-key';
+
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { Upload } = require("@aws-sdk/lib-storage");
+
+
+const AWS = require('aws-sdk');
+const openDb = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,26 +33,37 @@ app.use(express.json());
 // Serve uploaded images
 app.use('/uploads', express.static(uploadDir));
 
-// Multer setup for image uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const safeName = file.originalname.replace(/\s+/g, '_');
-    cb(null, `${timestamp}-${safeName}`);
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }
 });
-
+// Multer-S3 Storage Configuration
 const upload = multer({
-  storage,
+  storage: multerS3({
+    s3,
+    bucket: process.env.AWS_S3_BUCKET,
+    metadata: (req, file, cb) => {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: (req, file, cb) => {
+      const timestamp = Date.now();
+      const safeName = file.originalname.replace(/\s+/g, '_');
+      cb(null, `menu-images/${timestamp}-${safeName}`);
+    },
+  }),
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.mimetype)) {
       return cb(new Error('Only JPEG, PNG, and WebP images are allowed'));
     }
     cb(null, true);
-  }
+  },
 });
+
+app.use(express.json());
 
 // ✅ API ROUTES
 
@@ -54,7 +72,7 @@ app.post('/api/menu', upload.single('image'), async (req, res) => {
   try {
     const db = await openDb();
     const { name, description, category, price } = req.body;
-    const image = req.file ? req.file.filename : null;
+    const image = req.file ? req.file.location : null;
 
     const result = await db.run(
       'INSERT INTO menu (name, description, category, price, image) VALUES (?, ?, ?, ?, ?)',
@@ -68,7 +86,7 @@ app.post('/api/menu', upload.single('image'), async (req, res) => {
       category,
       price,
       image,
-      imageUrl: image ? `/uploads/${image}` : null
+      imageUrl: image ? image : null,
     });
   } catch (err) {
     console.error(err);
@@ -80,9 +98,9 @@ app.post('/api/menu', upload.single('image'), async (req, res) => {
 app.get('/api/menu', async (req, res) => {
   const db = await openDb();
   const items = await db.all('SELECT * FROM menu');
-  const formatted = items.map(item => ({
+  const formatted = items.map((item) => ({
     ...item,
-    imageUrl: item.image ? `/uploads/${item.image}` : null
+    imageUrl: item.image ? item.image : null,
   }));
   res.json(formatted);
 });
@@ -98,7 +116,7 @@ app.get('/api/menu/:id', async (req, res) => {
 
   res.json({
     ...item,
-    imageUrl: item.image ? `/uploads/${item.image}` : null
+    imageUrl: item.image ? item.image : null,
   });
 });
 
@@ -107,9 +125,9 @@ app.put('/api/menu/:id', upload.single('image'), async (req, res) => {
   const db = await openDb();
 
   const { name, description, category, price } = req.body;
-  
+
   // Check if new image is uploaded
-  let image = req.file ? req.file.filename : null;
+  let image = req.file ? req.file.location : null;
 
   // If no new image is uploaded, use the existing image from the database
   if (!image) {
@@ -133,7 +151,7 @@ app.put('/api/menu/:id', upload.single('image'), async (req, res) => {
       category,
       price,
       image,
-      imageUrl: image ? `/uploads/${image}` : null
+      imageUrl: image ? image : null,
     });
   } catch (err) {
     console.error(err);
@@ -191,7 +209,7 @@ app.post('/api/admin/login', async (req, res) => {
   // Generate a JWT token with a payload (e.g., admin ID, username)
   const token = jwt.sign(
     { id: admin.id, username: admin.username }, // Payload
-    JWT_SECRET, // Secret key to sign the token
+    process.env.JWT_SECRET, // Secret key to sign the token
     { expiresIn: '1h' } // Token expiration time (optional)
   );
 
@@ -272,7 +290,7 @@ app.delete('/api/contact/:id', async (req, res) => {
 
 // ⚠️ Catch-all to serve SPA
 app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
 app.listen(PORT, () => {

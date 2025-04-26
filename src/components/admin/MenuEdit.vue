@@ -177,9 +177,7 @@ const isFormDirty = computed(() =>
 );
 
 const imagePreviewUrl = computed(() =>
-  form.value.imagePreview?.startsWith('blob:')
-    ? form.value.imagePreview
-    : `/images/uploads/${form.value.imagePreview}`
+  form.value.imagePreview
 );
 </script>
 

@@ -48,9 +48,9 @@ export default {
     return {
       isMobile: window.innerWidth <= 768, // Determine if the screen size is mobile
       cards: [
-        { title: 'For Vegans', text: 'short descriptive text', img: require('../assets/veganSpecial2.jpeg') },
-        { title: 'Order Online', text: 'short descriptive text', img: require('../assets/orderMobile.png') },
-        { title: 'Specials', text: 'short descriptive text', img: require('../assets/springrollSpecial.jpeg') }
+        { title: 'For Vegans', text: 'short descriptive text', img: '/images/veganSpecial2.jpeg' },
+        { title: 'Order Online', text: 'short descriptive text', img: '/images/orderMobile.png'},
+        { title: 'Specials', text: 'short descriptive text', img: '/images/springrollSpecial.jpeg' }
       ]
     };
   },
