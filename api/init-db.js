@@ -1,4 +1,4 @@
-const openDb = require('./db');
+const {openDb} = require('./db');
 
 async function init() {
   const db = await openDb();
@@ -38,4 +38,4 @@ async function init() {
   console.log('✅ Table "admin_credentials" is ready inside holygrill.db');
 }
 
-init();
+module.exports = {init};
